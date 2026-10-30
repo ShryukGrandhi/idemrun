@@ -1,0 +1,13 @@
+[vars]
+port = 8080
+
+[hosts.web1]
+root = "fleet/web1"
+
+[hosts.web2]
+root = "fleet/web2"
+port = 8081
+
+[hosts.db1]
+root = "fleet/db1"
+workers = 2

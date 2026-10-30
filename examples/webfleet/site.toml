@@ -1,0 +1,65 @@
+# Provision a small fleet of web nodes. Paths are relative to each host's root.
+
+[vars]
+app = "shop"
+workers = 4
+release = "v1.4.2"
+
+[[resource]]
+type = "directory"
+path = "etc/{{app}}"
+mode = "0755"
+
+[[resource]]
+type = "directory"
+path = "var/log/{{app}}"
+mode = "0750"
+
+[[resource]]
+type = "directory"
+path = "opt/{{app}}/releases/{{release}}"
+
+[[resource]]
+type = "file"
+name = "app-config"
+path = "etc/{{app}}/app.conf"
+source = "templates/app.conf"
+mode = "0640"
+notify = "reload-app"
+
+[[resource]]
+type = "symlink"
+name = "current-release"
+path = "opt/{{app}}/current"
+target = "releases/{{release}}"
+requires = "directory[opt/{{app}}/releases/{{release}}]"
+notify = "reload-app"
+
+# Edit one setting inside a file we do not own entirely.
+[[resource]]
+type = "line"
+name = "somaxconn"
+path = "etc/sysctl.conf"
+line = "net.core.somaxconn = 4096"
+match = "^net\\.core\\.somaxconn"
+create = true
+
+# Only the database host runs the one-time schema setup.
+[[resource]]
+type = "command"
+name = "init-db"
+hosts = "db*"
+cmd = "mkdir -p var/lib/{{app}} && echo schema-1 > var/lib/{{app}}/schema"
+creates = "var/lib/{{app}}/schema"
+
+[[resource]]
+type = "absent"
+path = "etc/{{app}}/legacy.ini"
+
+# Handler: runs only if the config or release link actually changed.
+[[resource]]
+type = "command"
+name = "reload-app"
+handler = true
+cmd = "echo \"reload $IDEMRUN_HOST {{release}}\" >> var/log/{{app}}/reloads.log"
+requires = "directory[var/log/{{app}}]"

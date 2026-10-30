@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "idemrun"
+version = "0.1.0"
+description = "Declarative, idempotent configuration automation with a parallel DAG executor"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[project.scripts]
+idemrun = "idemrun.cli:main"
+
+[tool.setuptools]
+packages = ["idemrun"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
