@@ -129,3 +129,10 @@ def test_critical_path():
     ])
     cost = {"command[a]": 1.0, "command[b]": 2.0, "command[c]": 2.5}
     assert critical_path(p, cost) == 3.0
+
+
+def test_line_edits_chained_in_declaration_order():
+    p = plan_for([{"type": "line", "name": f"l{i}", "path": "f", "line": str(i), "create": True}
+                  for i in range(3)] + [{"type": "line", "name": "other", "path": "g", "line": "x"}])
+    assert p.after["line[l1]"] == {"line[l0]"} and p.after["line[l2]"] == {"line[l1]"}
+    assert p.after["line[other]"] == set() and p.requires["line[l1]"] == set()

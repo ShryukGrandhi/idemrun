@@ -30,10 +30,11 @@ class Plan:
     nodes: dict[str, Resource]
     requires: dict[str, set[str]] = field(default_factory=dict)   # hard deps
     notified_by: dict[str, set[str]] = field(default_factory=dict)  # handler -> notifiers
+    after: dict[str, set[str]] = field(default_factory=dict)        # ordering only
     order: list[str] = field(default_factory=list)
 
     def deps(self, rid: str) -> set[str]:
-        return self.requires[rid] | self.notified_by[rid]
+        return self.requires[rid] | self.notified_by[rid] | self.after[rid]
 
 
 def _resolve_ref(ref: str, nodes: dict[str, Resource], by_name: dict[str, list[str]], src: str) -> str:
@@ -86,6 +87,7 @@ def build_plan(host: str, resources: list[Resource]) -> Plan:
     for rid in nodes:
         plan.requires[rid] = set()
         plan.notified_by[rid] = set()
+        plan.after[rid] = set()
 
     owners: dict[str, str] = {}
     dirs: dict[str, str] = {}
@@ -121,6 +123,14 @@ def build_plan(host: str, resources: list[Resource]) -> Plan:
             if r.kind == "line" and p in files:
                 raise PlanError(f"{src}: edits {p!r}, whose whole content is managed by "
                                 f"{files[p]}; the two would undo each other on every run")
+
+    last_edit: dict[str, str] = {}
+    for r in sorted(resources, key=lambda r: r.index):
+        if r.kind == "line":
+            p = os.path.normpath(r.params["path"])
+            if p in last_edit:
+                plan.after[r.id].add(last_edit[p])
+            last_edit[p] = r.id
 
     for rid, r in nodes.items():
         if not r.handler and plan.notified_by[rid]:

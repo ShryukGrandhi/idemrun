@@ -181,3 +181,24 @@ def test_resource_bug_reported_not_hung(host):
 def test_invalid_jobs():
     with pytest.raises(ValueError):
         Executor(jobs=0)
+
+
+def test_line_edits_to_one_file_are_serialised(host):
+    # Regression: concurrent read-modify-write of a shared file lost updates.
+    data = {"resource": [{"type": "line", "name": f"l{i}", "path": "shared.conf",
+                          "line": f"opt{i} = 1", "create": True} for i in range(40)]}
+    first = converge(data, [host], jobs=16)
+    assert first.counts() == {"changed": 40}
+    lines = open(os.path.join(host.root, "shared.conf")).read().splitlines()
+    assert lines == [f"opt{i} = 1" for i in range(40)]
+    assert converge(data, [host], jobs=16).counts() == {"ok": 40}
+
+
+def test_serialisation_edge_does_not_propagate_failure(host):
+    os.mkdir(os.path.join(host.root, "f"))  # a directory where a file is expected
+    report = converge({"resource": [
+        {"type": "line", "name": "a", "path": "f", "line": "x"},
+        {"type": "line", "name": "b", "path": "f", "line": "y"},
+        {"type": "line", "name": "c", "path": "g", "line": "z", "create": True},
+    ]}, [host])
+    assert statuses(report) == {"line[a]": "failed", "line[b]": "failed", "line[c]": "changed"}
