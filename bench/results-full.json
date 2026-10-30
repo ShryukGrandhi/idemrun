@@ -1,0 +1,61 @@
+{
+  "python": "3.12.14",
+  "platform": "macOS-26.5.1-arm64-arm-64bit",
+  "cpus": 28,
+  "quick": false,
+  "converge": {
+    "hosts": 50,
+    "resources": 4050,
+    "jobs": 8,
+    "plan_s": 0.02174858283251524,
+    "cold_apply_s": 0.5095565402880311,
+    "cold_changed": 4050,
+    "cold_failed": 0,
+    "second_apply_s": 0.29997770953923464,
+    "second_changed": 0,
+    "check_s": 0.29125391598790884,
+    "check_drift": 0,
+    "cold_res_per_s": 7948.0875620018605,
+    "second_res_per_s": 13501.003145269675
+  },
+  "drift": {
+    "tampered": 100,
+    "flagged": 100,
+    "true_positives": 100,
+    "precision": 1.0,
+    "recall": 1.0,
+    "check_s": 0.2975382497534156,
+    "repaired": 100,
+    "drift_after_repair": 0
+  },
+  "scheduling": {
+    "hosts": 8,
+    "commands": 96,
+    "layers": 3,
+    "width": 4,
+    "sleep_s": 0.05,
+    "critical_path_s": 0.15000000000000002,
+    "runs": [
+      {
+        "jobs": 1,
+        "wall_s": 6.463260999880731,
+        "speedup": 1.0
+      },
+      {
+        "jobs": 4,
+        "wall_s": 1.5773637080565095,
+        "speedup": 4.097508372272746
+      },
+      {
+        "jobs": 16,
+        "wall_s": 0.4325120421126485,
+        "speedup": 14.943539995580895
+      },
+      {
+        "jobs": 64,
+        "wall_s": 0.298765666782856,
+        "speedup": 21.633211973376625
+      }
+    ]
+  }
+}
