@@ -7,7 +7,8 @@ Edges come from three places:
     directory, and a `line` edit depends on the `file` resource for that path.
 
 The planner also rejects specs that can never converge: unknown references,
-two resources owning the same path, notify targets that are not handlers, and
+two resources owning the same path, a `line` edit inside a file whose whole
+content is managed by a `file` resource, notify targets that are not handlers, and
 dependency cycles (reported with the actual cycle).
 """
 from __future__ import annotations
@@ -118,8 +119,8 @@ def build_plan(host: str, resources: list[Resource]) -> Plan:
                     break
                 parent = os.path.dirname(parent)
             if r.kind == "line" and p in files:
-                plan.requires[r.id].add(files[p])
-        plan.requires[r.id].discard(r.id)
+                raise PlanError(f"{src}: edits {p!r}, whose whole content is managed by "
+                                f"{files[p]}; the two would undo each other on every run")
 
     for rid, r in nodes.items():
         if not r.handler and plan.notified_by[rid]:
