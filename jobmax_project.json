@@ -1,0 +1,17 @@
+{
+  "name": "idemrun",
+  "language": "Python",
+  "tech": ["Python", "Automation", "Configuration Management", "Infrastructure as Code", "GitHub Actions CI/CD", "Pytest"],
+  "targets": ["automation", "infrastructure automation scripting", "configuration management", "drift detection", "parallel task scheduling", "automated testing and CI"],
+  "bullets": [
+    "Built idemrun, a Python infrastructure automation engine (Ansible-like) that renders TOML specs per host and converges 4050 resources across 50 hosts in 0.51s",
+    "Designed a DAG planner and parallel executor with failure isolation and handlers; idempotent re-runs make 0 changes and drift checks caught 100/100 tampered files",
+    "Automated testing with 52 pytest tests and GitHub Actions CI; benchmark exposed a lost-update race in concurrent config edits, fixed via planner serialization"
+  ],
+  "summary": {
+    "what": "A declarative, idempotent configuration-automation tool: you describe files, directories, config lines, symlinks and guarded commands for a fleet of hosts in TOML, and it applies only what differs, or reports drift in check mode.",
+    "how": "Specs are rendered per host with layered variables, turned into a dependency graph (explicit requires, handler notifications, auto-requires on parent directories, conflict and cycle detection), and every host's graph is run on one shared thread pool that submits a resource as soon as its dependencies finish, skipping dependents of failures.",
+    "hardest": "Making it correct under concurrency: the benchmark showed a second apply still changing line resources because parallel line edits to the same file were losing each other's writes. I fixed it with ordering-only edges in the planner, so edits to one file are serialised without making one failure skip the rest.",
+    "say": "I built a small Ansible-style automation engine in Python that plans each host's changes as a DAG and runs all hosts on one worker pool. On 50 generated hosts it converges 4050 resources in about half a second, a second run makes zero changes, and check mode caught all 100 random tamperings. My own benchmark caught a lost-update race in concurrent config edits, which I fixed in the planner and covered with a regression test."
+  }
+}
